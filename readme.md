@@ -1,6 +1,6 @@
-pasta destinada para aprender a usar o openpyxl
-
-biblioteca que permite a manipulação e automação de planilhas por comandos no python
-
-
-branch de teste(estou aprendendo git)
+Este diretório é destinado para testes e aprendizado de novas tecnologias em python.
+- openpyxl
+- pyautogui
+- opencv
+- tesseract
+- pygames
