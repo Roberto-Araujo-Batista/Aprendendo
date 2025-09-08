@@ -21,11 +21,6 @@ enviar.append(['clarice', '0', 'bebe'])
 #salvar planilha e fecha arquivo.
 planilha.save('dados.xlsx')
 
-
-
-
-
-
 arquivo = openpyxl.load_workbook('dados.xlsx')
 
 enviar = arquivo['Enviar']
