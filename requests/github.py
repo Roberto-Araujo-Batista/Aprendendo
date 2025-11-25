@@ -43,10 +43,10 @@ headers = {
 
 owner = 'roberto-araujo-batista'
 repo  = 'Aprendendo'
-path  = '.'
+path  = 'requests/'
 link_post = f'https://api.github.com/repos/{owner}/{repo}/contents/{path}'
 
-response = requests.post(link_post)
+response = requests.post(link_post, headers=headers)
 
 
 print(f"Status Code: {response.status_code}")
