@@ -1,6 +1,6 @@
 import socket, os
 
-host = '127.0.0.1'
+host = '10.20.28.90'
 port = 60000
 servidor = (host, port)
 
