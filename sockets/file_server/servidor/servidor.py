@@ -8,9 +8,9 @@ port = 60000
 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udp_socket.bind((host, port))  # especifica qual porta e ip da máquina receber as solicitações
 
-enviado = False
+continuar = 1
 
-while not enviado:
+while continuar:
 
     print('Aguardando solicitação...')
 
@@ -18,10 +18,12 @@ while not enviado:
     # recvfrom sempre recebe os bytes e o adrress do solicitante
     # adress = ip e porta do solicitante
     tamanho_arquivo, cliente = udp_socket.recvfrom(1)
+
+
     tamanho_arquivo = int.from_bytes(tamanho_arquivo)
 
     nome_arquivo, cliente = udp_socket.recvfrom(tamanho_arquivo)
-    nome_arquivo = nome_arquivo.decode('utf-8')
+    nome_arquivo = nome_arquivo.decode('utf-8') 
 
     print('-' * 20 + ' INFORMAÇÕES DA SOLICITAÇÃO ' + '-' * 20)
 
@@ -58,14 +60,11 @@ while not enviado:
         except:
             print('erro ao abrir arquivo para enviar')
 
-        enviado = True
-
 
     else:
         udp_socket.sendto(status, cliente)
         print('Arquivo não encontrado')
 
-        enviado = True
 
 udp_socket.close()
 print('Fim da execução')

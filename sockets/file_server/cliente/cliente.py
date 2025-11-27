@@ -16,7 +16,6 @@ udp_socket.sendto(nome_arquivo, (servidor))
 
 status, src = udp_socket.recvfrom(1)
 status = int.from_bytes(status)
-print(status)
 
 if status:
     print('Arquivo encontrado, recebendo arquivo...')
