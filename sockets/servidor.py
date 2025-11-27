@@ -1,4 +1,8 @@
-import socket, os 
+import socket, os
+
+
+print('-'*20+' SERVIDOR DISPONÍVEL ' + '-'*20)
+
 
 host = ''
 port = 60000
@@ -10,23 +14,18 @@ enviado = False
 while not enviado:
 
     
-    print('Esperando solicitação...')
+    print('Aguardando solicitação...')
 
     #recebe primeiro byte(tamanho do nome do arquivo)
     #recvfrom sempre recebe os bytes e o adrress do solicitante
     #adress = ip e porta do solicitante
     tamanho_arquivo , cliente = udp_socket.recvfrom(1) 
     tamanho_arquivo = int.from_bytes(tamanho_arquivo)
-    
-    print('-' *30)
-    print(f'''
-    Tamanho do arquivo: {tamanho_arquivo}
-    ip cliente:         {cliente[0]}
-    porta cliente:      {cliente[1]}
-    ''')
 
     nome_arquivo, cliente = udp_socket.recvfrom(tamanho_arquivo)
-    print('-' *30)
+    nome_arquivo = nome_arquivo.decode('utf-8')
+
+    print('-'*20 + ' INFORMAÇÕES DA SOLICITAÇÃO '+'-'*20)
     
     print(f'''
     nome:               {nome_arquivo}
@@ -40,6 +39,21 @@ while not enviado:
         udp_socket.sendto(b'1', cliente)
         print('Arquivo encontrado')
 
+        #mandar tamanho do arquivo, no máximo 4 bytes
+        tamanho_arquivo = os.path.getsize(nome_arquivo).to_bytes(4)
+        udp_socket.sendto(tamanho_arquivo, cliente)
+        tamanho_arquivo = int.from_bytes(tamanho_arquivo)
+
+        #ler o arquivo para mandar
+        arquivo = open(nome_arquivo, 'rb')
+
+        while tamanho_arquivo > 0:
+            enviar = arquivo.read(4096)
+            udp_socket.sendto(enviar, cliente)
+            tamanho_arquivo = tamanho_arquivo - 4096
+        arquivo.close()
+
+
         enviado = True
 
     else:
@@ -48,4 +62,6 @@ while not enviado:
 
         enviado = True  
 
-    print('Fim da execução')
+
+udp_socket.close()
+print('Fim da execução')
