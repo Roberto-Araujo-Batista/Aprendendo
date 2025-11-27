@@ -3,7 +3,7 @@ import socket
 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
-ip = '10.20.28.90'
+ip = '127.0.0.1'
 porta = 60000
 servidor = (ip, porta)
 

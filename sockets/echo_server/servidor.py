@@ -2,7 +2,7 @@ import socket
 
 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-udp_socket.bind('', 60000)
+udp_socket.bind(('', 60000))
 print('Servidor Online')
 
 while True:
