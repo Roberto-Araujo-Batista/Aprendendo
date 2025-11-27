@@ -1,18 +1,39 @@
-import socket
+import socket, os
 
+host = '127.0.0.1'
+port = 60000
+servidor = (host, port)
+
+# acoplar o socket da camada de transporte
 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+nome_arquivo = input('Digite o nome do arquivo: ')
+nome_arquivo = nome_arquivo.encode()
+tamanho_nome = len(nome_arquivo).to_bytes()
 
-ip = '10.20.28.90'
-porta = 60000
-servidor = (ip, porta)
+udp_socket.sendto(tamanho_nome, (servidor))
+udp_socket.sendto(nome_arquivo, (servidor))
 
-dados = input('Digite os dados a serem enviados: \n')
-dados = dados.encode()
+status, src = udp_socket.recvfrom(1)
+status = int.from_bytes(status)
+print(status)
 
-udp_socket.sendto(dados, servidor)
+if status:
+    print('Arquivo encontrado, recebendo arquivo...')
 
-dados, serv = udp_socket.recvfrom(4050)
+    tamanho_arquivo, server = udp_socket.recvfrom(4)
+    tamanho_arquivo = int.from_bytes(tamanho_arquivo)
 
-print('retorno do servidor: /n', dados)
+    arquivo = open(nome_arquivo, 'bw')
+    while tamanho_arquivo > 0:
+        dados, server = udp_socket.recvfrom(4096)
+        arquivo.write(dados)
+        tamanho_arquivo = tamanho_arquivo - 4096
+    print('Arquivo salvo com sucesso')
+    arquivo.close()
 
+else:
+    print('Arquivo não encontrado')
+
+udp_socket.close()
+print('Fim da execução')
