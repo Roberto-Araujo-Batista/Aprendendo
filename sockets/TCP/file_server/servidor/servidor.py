@@ -1,4 +1,4 @@
-import socket, os, time
+import socket, os
 
 print('-' * 20 + ' SERVIDOR DISPONÍVEL ' + '-' * 20)
 

@@ -15,18 +15,18 @@ tamanho_nome = len(nome_arquivo).to_bytes()
 tcp_socket.send((tamanho_nome))
 tcp_socket.send(nome_arquivo)
 
-status, src = tcp_socket.recv(1)
+status = tcp_socket.recv(1)
 status = int.from_bytes(status)
 
 if status:
     print('Arquivo encontrado, recebendo arquivo...')
 
-    tamanho_arquivo, server = tcp_socket.recv(4)
+    tamanho_arquivo = tcp_socket.recv(4)
     tamanho_arquivo = int.from_bytes(tamanho_arquivo)
 
     arquivo = open(nome_arquivo, 'bw')
     while tamanho_arquivo > 0:
-        dados, server = tcp_socket.recv(4096)
+        dados = tcp_socket.recv(4096)
         arquivo.write(dados)
         tamanho_arquivo = tamanho_arquivo - 4096
     print('Arquivo salvo com sucesso')
