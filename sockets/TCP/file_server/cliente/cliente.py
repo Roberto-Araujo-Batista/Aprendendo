@@ -18,6 +18,8 @@ tcp_socket.send(nome_arquivo)
 status = tcp_socket.recv(1)
 status = int.from_bytes(status)
 
+
+
 if status:
     print('Arquivo encontrado, recebendo arquivo...')
 
