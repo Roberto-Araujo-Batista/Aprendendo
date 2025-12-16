@@ -1,7 +1,48 @@
 import socket, os, json
 
 def enviar_arquivos():
-    print('ainda não foi feito')
+    print('------ Download de arquivos -----')
+    print('operação: 10')
+
+    #recebendo tamanho do nome do arquivo e nome do arquivo para procurar na pasta
+    tamanho_nome = con.recv(4)
+    tamanho_nome = int.from_bytes(tamanho_nome)
+
+    nome_arquivo = con.recv(tamanho_nome)
+    nome_arquivo = nome_arquivo.decode()
+    print(f'Nome do arquivo solicitado: {nome_arquivo}')
+    
+    #criando caminho para encontrar o arquivo na pasta
+    caminho_arquivo = f'arquivos/{nome_arquivo}'
+
+    lista_arquivos = os.listdir('arquivos')
+    #verificando se arquivo existe para enviá-lo
+    if nome_arquivo in lista_arquivos:
+        print('esse aquivo existe! Preparar para enviar')
+
+        #enviando status para dizer que arquivo existe
+        status = int.to_bytes(0)
+        con.send(status)
+
+        #enviando tamanho do arquivo
+        tamanho_arquivo = os.path.getsize(caminho_arquivo)
+        tamanho_arquivoe = int.to_bytes(tamanho_arquivo, 4)
+        con.send(tamanho_arquivoe)
+
+        #enviando arquivo
+        arquivo = open(caminho_arquivo, 'rb')
+        while tamanho_arquivo > 0:
+            dados = arquivo.read(1024)
+            con.send(dados)
+            tamanho_arquivo = tamanho_arquivo - 1024
+        arquivo.close()
+
+
+    else:
+        status = int.to_bytes(1)
+        con.send(status)
+        print('arquivo não encontrado')
+
 
 def listar_arquivos():
     try: #deu certo, enviar 0 
@@ -58,6 +99,12 @@ def receber_arquivos():
     print('ainda não foi feito')
 
 
+def enviar_partes_arquivos():
+    print('ainda não foi feito')
+
+def enviar_varios_arquivos():
+    print('ainda não foi feito')
+
 
 #estabelecendo conexão
 def main():
@@ -73,31 +120,33 @@ def main():
     tcp_socket.listen(1)
 
     while True:
-        print('-------------- ESPERANDO SOLICITAÇÕES ----------------')
-        con, cliente = tcp_socket.accept()
-        print(f'conectado a {cliente}')
+        try:
+            print('-------------- ESPERANDO SOLICITAÇÕES ----------------')
+            con, cliente = tcp_socket.accept()
+            print(f'conectado a {cliente}')
 
-        operacao = con.recv(2)
-        operacao = int.from_bytes(operacao)
-        print(operacao)
-        
-        if operacao == 10:
-            #solicita o download de um arquivo
-            enviar_arquivos()
-        if operacao == 20:
-            #lista arquivos
-            listar_arquivos()
-        if operacao == 30:
-            #solicita upload de arquivos
-            receber_arquivos()
-        if operacao == 40:
-            #solicita download de um aquivo, especificando até onde enviar
-            enviar_arquivos()
-        if operacao == 50:
-            #solicita uma lista de arquivos para download
-            enviar_arquivos()
-        else:
-            print('Essa operação não existe!')
+            operacao = con.recv(2)
+            operacao = int.from_bytes(operacao)
+            
+            if operacao == 10:
+                #solicita o download de um arquivo
+                enviar_arquivos()
+            if operacao == 20:
+                #lista arquivos
+                listar_arquivos()
+            if operacao == 30:
+                #solicita upload de arquivos
+                receber_arquivos()
+            if operacao == 40:
+                #solicita download de um aquivo, especificando até onde enviar
+                enviar_partes_arquivos()
+            if operacao == 50:
+                #solicita uma lista de arquivos para download
+                enviar_varios_arquivos()
+            else:
+                raise ModuleNotFoundError
 
+        except:
+            print('Essa operação não existe')
 main()
 

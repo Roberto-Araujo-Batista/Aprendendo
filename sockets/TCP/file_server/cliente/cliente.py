@@ -1,6 +1,6 @@
 import socket, os
 
-host = '192.168.1.110'
+host = '127.0.0.1'
 port = 60000
 
 # acoplar o socket da camada de transporte
