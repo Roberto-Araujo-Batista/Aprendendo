@@ -1,11 +1,22 @@
-import socket, os, json
-
-host = '127.0.0.1'
-port = 20000
-
+import socket
+import sys, os
+import json
 
 #estabelecendo conexão
 def main():
+    #sabendo informações do servidor
+    parametros = sys.argv
+    if len(parametros) >= 3:
+        host = parametros[1]
+        port = int(parametros[2])
+    elif len(parametros) == 2:
+        host = parametros[1]
+        port = int(input('Digite o número da porta: '))
+    else:
+        host = input('Digite o ip do host: ')
+        port = int(input('Digite o número da porta: '))
+
+    #informações sobre o socket
     tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tcp_socket.connect((host, port))
     
@@ -32,6 +43,8 @@ def main():
         
         else:
             print('algum erro na operação')
+
+
 
     tcp_socket.close()
 
