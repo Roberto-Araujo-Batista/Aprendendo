@@ -1,4 +1,5 @@
 import socket, os, json
+import threading
 
 def enviar_arquivos():
     print('------ Download de arquivos -----')
@@ -148,5 +149,5 @@ def main():
 
         except:
             print('Essa operação não existe')
-main()
 
+main()
