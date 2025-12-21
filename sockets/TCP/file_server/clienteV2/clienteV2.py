@@ -78,12 +78,42 @@ def main():
 
             lista_json = tcp_socket.recv(tamanho_json)
             lista_json = json.loads(lista_json)
-            print(lista_json)
+
+            #exibindo a lista
+            pos = 0
+            while pos < len(lista_json):
+                dic = lista_json[pos]
+                print(f"Arquivo: {dic['nome']} \nTamanho: {dic['tamanho']}")
+                print('-'*10)
+                pos = pos +1
+
         
         else:
             print('algum erro na operação')
 
 
+
+    if opcao == 30:
+        print('----- Upload de Arquivos -----')
+        nome_arquivo = input('Digite o nome do arquivo: ')
+
+
+        tamanho_nome = len(nome_arquivo)
+        tamanho_nome = int.to_bytes(tamanho_nome)
+
+        nome_arquivo = nome_arquivo.encode()
+
+
+        tcp_socket.send(tamanho_nome)
+        tcp_socket.send(nome_arquivo)
+
+        print('tudo foi enviado, esperando status')
+        status = tcp_socket.recv(1)
+        status = int.from_bytes(status)
+        if status == 1:
+            print('confirmada permissão enviar arquivo')
+        if status == 0:
+            print('permissão negada')
 
     tcp_socket.close()
 

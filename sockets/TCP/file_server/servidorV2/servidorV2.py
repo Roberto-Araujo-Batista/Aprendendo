@@ -96,8 +96,23 @@ def listar_arquivos():
 
 
 def receber_arquivos():
+    print('----- Recebendo Arquivos -----')
     
-    print('ainda não foi feito')
+    tamanho_nome = con.recv(1)
+    nome_arquivo = con.recv(tamanho_nome)
+    
+    print(f'Foi solicitado o upload do arquivo chamado: {nome_arquivo}\n1.sim\n0.não')
+    opcao = int(input('Você deseja permitir o upload desse arquivo?'))
+
+    if opcao == 1:
+        print('Operação aceita, baixando arquivo...')
+        status = int.to_bytes(1)
+        con.send(status)
+    else:
+        print('Operação negada, infomando ao cliente...')
+        status = int.to_bytes(0)
+        con.send(status)
+
 
 
 def enviar_partes_arquivos():
@@ -126,7 +141,7 @@ def main():
             con, cliente = tcp_socket.accept()
             print(f'conectado a {cliente}')
 
-            operacao = con.recv(2)
+            operacao = con.recv(1)
             operacao = int.from_bytes(operacao)
             
             if operacao == 10:
