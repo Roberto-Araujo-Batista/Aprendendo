@@ -97,23 +97,32 @@ def main():
         print('----- Upload de Arquivos -----')
         nome_arquivo = input('Digite o nome do arquivo: ')
 
-
+        nome_arquivo = nome_arquivo        
         tamanho_nome = len(nome_arquivo)
-        tamanho_nome = int.to_bytes(tamanho_nome)
 
-        nome_arquivo = nome_arquivo.encode()
-
-
-        tcp_socket.send(tamanho_nome)
-        tcp_socket.send(nome_arquivo)
+        tcp_socket.send(int.to_bytes(tamanho_nome,4))
+        tcp_socket.send(nome_arquivo.encode())
 
         print('tudo foi enviado, esperando status')
         status = tcp_socket.recv(1)
         status = int.from_bytes(status)
         if status == 1:
             print('confirmada permissão enviar arquivo')
+            #enviando arquivo
+            arquivo = open(f'arquivos/{nome_arquivo}', 'rb')
+            while tamanho_arquivo > 0:
+                dados = arquivo.read(1024)
+                tcp_socket.send(dados)
+                tamanho_arquivo -= 1024
+            arquivo.close()
+
+        print('arquivo enviado com sucesso!')
         if status == 0:
             print('permissão negada')
+
+        
+
+
 
     tcp_socket.close()
 
