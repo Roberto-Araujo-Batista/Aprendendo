@@ -1,3 +1,5 @@
+
+#imports para o sistema
 import socket
 import sys, os
 import json
@@ -22,8 +24,7 @@ def main():
     
     #enviando solicitação
     opcao = int(input('digite uma opção: '))  
-    opcao_e = opcao.to_bytes(1)
-    tcp_socket.send(opcao_e)
+    tcp_socket.send(int.to_bytes(opcao))
     
     #download arquivos
     if opcao == 10:
@@ -97,7 +98,7 @@ def main():
         print('----- Upload de Arquivos -----')
         nome_arquivo = input('Digite o nome do arquivo: ')
 
-        nome_arquivo = nome_arquivo        
+        nome_arquivo = nome_arquivo.encode()    
         tamanho_nome = len(nome_arquivo)
 
         tcp_socket.send(int.to_bytes(tamanho_nome,4))
@@ -121,6 +122,14 @@ def main():
             print('permissão negada')
 
         
+    if opcao == 40:
+        nome_arquivo = 'gato.jpeg'
+        nome_arquivo = nome_arquivo.encode()
+        tamanho_nome = int.to_bytes(len(nome_arquivo), 4)
+
+
+        tcp_socket.send(tamanho_nome)
+        tcp_socket.send(nome_arquivo)
 
 
 

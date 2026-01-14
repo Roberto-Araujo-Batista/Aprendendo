@@ -1,6 +1,8 @@
 import socket, os, json
 import threading
 
+DEBUG = True    
+
 def enviar_arquivos():
     print('------ Download de arquivos -----')
     print('operação: 10')
@@ -109,7 +111,7 @@ def receber_arquivos():
 
     if opcao == 1:
         print('Operação aceita, baixando arquivo...')
-        status = int.to_bytes(1)
+        status = int.to_bytes(0)
         con.send(status)
         
         #recebendo arquivo
@@ -122,13 +124,45 @@ def receber_arquivos():
 
     else:
         print('Operação negada, infomando ao cliente...')
-        status = int.to_bytes(0)
+        status = int.to_bytes(1)
         con.send(status)
 
 
 
+
+
+
+
+
+
+
 def enviar_partes_arquivos():
-    print('ainda não foi feito')
+    #recebendo tamanho do nome e nome do arquvio
+    tamanho_nome = con.recv(4)
+    nome_arquivo = con.recv(int.from_bytes(tamanho_nome))
+    nome_arquivo = nome_arquivo.decode()
+
+    if DEBUG: print(tamanho_nome, nome_arquivo)
+
+    if os.path.isfile(f'arquivos/{nome_arquivo}'): #verifica se o arquivo existe
+        print('arquivo existe!!')
+
+
+    print(f'{cliente} está fazendo o download do arquivo: {nome_arquivo}')    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def enviar_varios_arquivos():
     print('ainda não foi feito')
@@ -165,7 +199,6 @@ def main():
             if operacao == 30:
                 #solicita upload de arquivos
                 receber_arquivos()
-                print('entrou/saiu aqui')
             if operacao == 40:
                 #solicita download de um aquivo, especificando até onde enviar
                 enviar_partes_arquivos()
