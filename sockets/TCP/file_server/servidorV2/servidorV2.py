@@ -1,4 +1,4 @@
-import socket, os, json
+import socket, os, json, time
 import threading
 
 DEBUG = True    
@@ -66,12 +66,13 @@ def listar_arquivos():
             arquivo = arquivo + 1
         
         #exibindo a lista
-        pos = 0
-        while pos < len(lista_json):
-            dic = lista_json[pos]
-            print(f"Arquivo: {dic['nome']} \nTamanho: {dic['tamanho']}")
-            print('-'*10)
-            pos = pos +1
+        if DEBUG:
+            pos = 0
+            while pos < len(lista_json):
+                dic = lista_json[pos]
+                print(f"Arquivo: {dic['nome']} \nTamanho: {dic['tamanho']}")
+                print('-'*10)
+                pos = pos +1
 
         #enviando código de confirmação:
         status = int.to_bytes(0)
@@ -128,62 +129,79 @@ def receber_arquivos():
         con.send(status)
 
 
-
-
-
-
-
-
-
-
-def enviar_partes_arquivos():
-    #recebendo tamanho do nome e nome do arquvio
+def enviar_varios_arquivos():
+    #nessa opção o usuário vai poder utilizar uma máscara como * ou , para especificar quais arquivos    
     tamanho_nome = con.recv(4)
     nome_arquivo = con.recv(int.from_bytes(tamanho_nome))
+    
+    #arquivo com caracter especial
     nome_arquivo = nome_arquivo.decode()
 
-    if DEBUG: print(tamanho_nome, nome_arquivo)
+    lista = os.listdir('arquivos')
 
-    if os.path.isfile(f'arquivos/{nome_arquivo}'): #verifica se o arquivo existe
-        print('arquivo existe!!')
+    arquivos_enviar = [] #lista de arquivos que serão enviados
+
+    try:
+        #listar arquivos que serão enviados
+        if nome_arquivo[0] == '*':
+            nome_arquivo = nome_arquivo.replace('*', '')
+            for arquivo in lista:
+                if nome_arquivo in arquivo:
+                    arquivos_enviar += [arquivo]
+
+        elif nome_arquivo.find(','):
+            arquivos = nome_arquivo.split(',')
+            if DEBUG: print(arquivos)
+            for arquivo in arquivos:
+                if arquivo in lista:
+                    arquivos_enviar += [arquivo]
+
+        if DEBUG: print(arquivos_enviar)
+        
+        #mandar resposta com quantos arquivos encontrou
+        # e decidir se envia os arquivos:
+        quantidade_arquivos = len(arquivos_enviar)
+        con.send(int.to_bytes(quantidade_arquivos, 4))
+        if quantidade_arquivos == 0:
+            raise FileNotFoundError
+
+        #enviando arquivos
+        for nome_arquivo in arquivos_enviar:
+            #enviado tamanho do nome, nome e tamanho do arquivo
+            tamanho_nome = len(nome_arquivo.encode())
+            con.send(int.to_bytes(tamanho_nome, 4))
+            con.send(nome_arquivo.encode())
+
+            tamanho_arquivo = os.path.getsize(f'arquivos/{nome_arquivo}')
+            con.send(int.to_bytes(tamanho_arquivo, 4))
+
+            if DEBUG: print('nome do arquivo, tamanho do nome do arquivo e tamanho do arquivo',nome_arquivo, tamanho_nome, tamanho_arquivo)
+            #enviando o arquivo de fato
+            arquivo = open(f'arquivos/{nome_arquivo}', 'rb')
+            while tamanho_arquivo > 0:
+                dados = arquivo.read(1024)
+                con.send(dados)
+                tamanho_arquivo -= 1024
+            arquivo.close()
+        if DEBUG: print('arquivos enviados com sucesso!')
 
 
-    print(f'{cliente} está fazendo o download do arquivo: {nome_arquivo}')    
+
+    except FileNotFoundError:
+        if DEBUG: print('nenhum arquivo encontrado')
+        return 0
+
+    except Exception as e:
+        erro = type(e).__name__
+        if DEBUG: print('erro no djabo da função enviar_varios_arquivos', erro)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-def enviar_varios_arquivos():
-    print('ainda não foi feito')
-
-
-#estabelecendo conexão
-def main():
+def menu():
     global con, cliente
-
-    host = ''
-    port = 20000
-
-    #configurando para ser um socket tcp
-    tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #configurando para deixar em modo passivo(modo de servidor)
-    tcp_socket.bind((host, port))
-    tcp_socket.listen(1)
 
     while True:
         try:
-            print('-------------- ESPERANDO SOLICITAÇÕES ----------------')
+            print('-------------- ESPERANDO CONEXÃO ----------------')
             con, cliente = tcp_socket.accept()
             print(f'conectado a {cliente}')
 
@@ -199,9 +217,9 @@ def main():
             if operacao == 30:
                 #solicita upload de arquivos
                 receber_arquivos()
-            if operacao == 40:
+            #if operacao == 40:
                 #solicita download de um aquivo, especificando até onde enviar
-                enviar_partes_arquivos()
+                #não foi feita
             if operacao == 50:
                 #solicita uma lista de arquivos para download
                 enviar_varios_arquivos()
@@ -211,4 +229,32 @@ def main():
         except:
             print('Essa operação não existe')
 
+
+
+
+
+#estabelecendo conexão
+def main():
+    try:
+        global tcp_socket
+
+        host = ''
+        port = 20000
+
+        #configurando para ser um socket tcp
+        tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #configurando para deixar em modo passivo(modo de servidor)
+        tcp_socket.bind((host, port))
+        tcp_socket.listen(1)
+
+        
+        threading.Thread(target=menu).start()
+    
+    except OSError:
+        print('Erro na conexão da porta!!!\nprovavelmente a porta já está sendo usada')
+    except Exception as e:
+        erro = type(e).__name__
+        print('erro no main(): ', erro)
+
 main()
+
