@@ -1,12 +1,17 @@
-import socket, os, json, time
+import socket, os, json
 import threading
 
 DEBUG = True    
 
-def enviar_arquivos():
-    print('------ Download de arquivos -----')
-    print('operação: 10')
+def saber_ip():
+    hostname = socket.gethostname()
+    ip = socket.gethostbyname_ex(hostname)
+    return ip
 
+print(saber_ip())
+
+
+def enviar_arquivos():
     #recebendo tamanho do nome do arquivo e nome do arquivo para procurar na pasta
     tamanho_nome = con.recv(4)
     tamanho_nome = int.from_bytes(tamanho_nome)
@@ -196,15 +201,20 @@ def enviar_varios_arquivos():
         if DEBUG: print('erro no djabo da função enviar_varios_arquivos', erro)
 
 
-def menu():
+
+def conectando():
     global con, cliente
 
     while True:
-        try:
-            print('-------------- ESPERANDO CONEXÃO ----------------')
-            con, cliente = tcp_socket.accept()
-            print(f'conectado a {cliente}')
+        print('-------------- ESPERANDO CONEXÃO ----------------')
+        con, cliente = tcp_socket.accept()
+        print(f'conectado a {cliente}')
+        threading.Thread(target=menu).start()
 
+
+
+def menu():
+        try:
             operacao = con.recv(1)
             operacao = int.from_bytes(operacao)
             
@@ -222,15 +232,13 @@ def menu():
                 #não foi feita
             if operacao == 50:
                 #solicita uma lista de arquivos para download
-                enviar_varios_arquivos()
+                enviar_varios_arquivos() 
+
             else:
                 raise ModuleNotFoundError
 
         except:
             print('Essa operação não existe')
-
-
-
 
 
 #estabelecendo conexão
@@ -247,8 +255,7 @@ def main():
         tcp_socket.bind((host, port))
         tcp_socket.listen(1)
 
-        
-        threading.Thread(target=menu).start()
+        threading.Thread(target=conectando).start()
     
     except OSError:
         print('Erro na conexão da porta!!!\nprovavelmente a porta já está sendo usada')
