@@ -250,7 +250,7 @@ def obtemRAID():
         atualiza_paridade(paridade=0)
         correto('RAID encontrado com sucesso')
     except FileNotFoundError:
-        errado(f'{pasta} ainda não foi criado.\n Para criar um RAID do zero use a função {certo('incializaRAID')}')
+        errado(f'{pasta} ainda não foi criado.\n Para criar um RAID do zero use a função incializaRAID')
     except Exception as e:
         erro_funcao('obtemRAID', e)
 
